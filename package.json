@@ -1,13 +1,17 @@
 {
-  "name": "hono-cms-core",
-  "version": "0.6.0",
-  "description": "Shared engine for the Hono CMS template: auth, schemas, D1 query helpers, logger, and admin UI components for Cloudflare Workers + Hono JSX sites.",
+  "name": "@max-network/hono-cms-core",
+  "version": "0.7.0",
+  "description": "Shared engine for the Hono CMS template: auth, schemas, D1 query helpers, logger, public-site chrome (Layout/Header/Footer), admin UI components, and a Workers vitest config for Cloudflare Workers + Hono JSX sites.",
   "type": "module",
   "license": "MIT",
   "author": "quotentiroler",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/quotentiroler/hono-cms-core.git"
+    "url": "git+https://github.com/max-network/hono-cms-core.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "sideEffects": false,
   "files": [
@@ -42,6 +46,26 @@
     "./components/HtmlEditor": {
       "types": "./dist/components/HtmlEditor.d.ts",
       "default": "./dist/components/HtmlEditor.js"
+    },
+    "./components/Layout": {
+      "types": "./dist/components/Layout.d.ts",
+      "default": "./dist/components/Layout.js"
+    },
+    "./components/Header": {
+      "types": "./dist/components/Header.d.ts",
+      "default": "./dist/components/Header.js"
+    },
+    "./components/Footer": {
+      "types": "./dist/components/Footer.d.ts",
+      "default": "./dist/components/Footer.js"
+    },
+    "./chrome": {
+      "types": "./dist/lib/chrome.d.ts",
+      "default": "./dist/lib/chrome.js"
+    },
+    "./vitest": {
+      "types": "./dist/testing/vitest.d.ts",
+      "default": "./dist/testing/vitest.js"
     }
   },
   "scripts": {
@@ -51,14 +75,22 @@
     "prepare": "npm run build"
   },
   "peerDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.16.0",
     "hono": "^4",
+    "vitest": "^4",
     "zod": "^4"
   },
+  "peerDependenciesMeta": {
+    "@cloudflare/vitest-pool-workers": { "optional": true },
+    "vitest": { "optional": true }
+  },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.16.15",
     "@cloudflare/workers-types": "^4.20260613.1",
     "hono": "^4.12.25",
     "rimraf": "^6.0.1",
     "typescript": "^6.0.3",
+    "vitest": "^4.1.10",
     "zod": "^4.4.3"
   }
 }

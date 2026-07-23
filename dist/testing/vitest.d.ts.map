@@ -1,0 +1,1 @@
+{"version":3,"file":"vitest.d.ts","sourceRoot":"","sources":["../../src/testing/vitest.ts"],"names":[],"mappings":"AAMA,MAAM,WAAW,mBAAmB;IAClC,2FAA2F;IAC3F,UAAU,CAAC,EAAE,MAAM,CAAA;IACnB,4FAA4F;IAC5F,aAAa,CAAC,EAAE,MAAM,CAAA;CACvB;AAED;;;;GAIG;AACH,wBAAsB,wBAAwB,CAAC,OAAO,GAAE,mBAAwB,sCAW/E"}

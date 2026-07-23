@@ -33,3 +33,17 @@ export type { PageContent } from "./lib/db.js"
 // AdminLayout now lives in @max-network/hono-ui/admin — consumers import it from there directly.
 export { ImageUpload } from "./components/ImageUpload.js"
 export { HtmlEditor } from "./components/HtmlEditor.js"
+
+// Shared public-site chrome — one Layout/Header/Footer for every CMS site,
+// driven by a normalized SiteChrome the consumer builds from its own config.
+export { Layout } from "./components/Layout.js"
+export { Header } from "./components/Header.js"
+export { Footer } from "./components/Footer.js"
+export type {
+  SiteChrome,
+  NavItem,
+  LogoConfig,
+  FaviconLink,
+  FooterConfig,
+  ChromeSeo,
+} from "./lib/chrome.js"

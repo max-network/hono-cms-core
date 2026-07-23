@@ -1,0 +1,29 @@
+name: Publish
+
+# Publishes @max-network/hono-cms-core to GitHub Packages on a published Release
+# (or manual dispatch). All dependencies are public npm, so install needs no
+# auth; the workflow GITHUB_TOKEN with packages:write authenticates the publish.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@max-network"
+      - run: npm install
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm publish

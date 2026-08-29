@@ -1,29 +1,81 @@
-name: Publish
+name: Publish to GitHub Packages
 
-# Publishes @max-network/hono-cms-core to GitHub Packages on a published Release
-# (or manual dispatch). All dependencies are public npm, so install needs no
-# auth; the workflow GITHUB_TOKEN with packages:write authenticates the publish.
+# Publishes @max-network/hono-cms-core to GitHub Packages (npm.pkg.github.com).
+#
+# THE TRIGGER CHANGED. This used to publish ONLY from a published GitHub Release, which is
+# the bug worker-utils, billing, text-search and i18n each already fixed in their own copy
+# of this file: a merged version bump sat unpublished until someone cut a release by hand.
+# The fix was applied four times by copy-paste and three repos were missed, this being one.
+#
+# RELEASING = BUMPING THE VERSION IN YOUR PR. A merge whose version is already on the
+# registry publishes nothing and says so in the run summary, so a docs- or CI-only merge is
+# a safe no-op rather than a red build. The release and `v*` triggers are kept so a release
+# can still drive a publish; the already-published check makes running twice harmless.
+#
+# The gate is NOT defined here. It lives in check.yml, which this calls, so pull requests
+# and releases run the identical suite.
 on:
+  push:
+    branches: [main]
+    tags:
+      - "v*"
   release:
     types: [published]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  # A red typecheck/build here stops the publish job below from running at all.
+  check:
+    uses: ./.github/workflows/check.yml
+    secrets: inherit
+
   publish:
+    needs: check
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://npm.pkg.github.com
           scope: "@max-network"
-      - run: npm install
-      - run: npm run typecheck
-      - run: npm run build
-      - run: npm publish
+          cache: npm
+
+      # Installs devDeps and runs `prepare` (the tsc build) so dist/ is fresh.
+      - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Is this version already published?
+        id: check
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "\`$NAME@$VERSION\` is already on the registry — nothing to publish. Bump the version in package.json to cut a release." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "Publishing \`$NAME@$VERSION\`." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Publish
+        if: steps.check.outputs.published == 'false'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

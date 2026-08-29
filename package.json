@@ -75,7 +75,7 @@
     "prepare": "npm run build"
   },
   "peerDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.16.0",
+    "@cloudflare/vitest-pool-workers": ">=0.16.0",
     "hono": "^4",
     "vitest": "^4",
     "zod": "^4"
@@ -89,7 +89,7 @@
     }
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.16.15",
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
     "@cloudflare/workers-types": "^5.20260829.1",
     "hono": "^4.13.5",
     "rimraf": "^6.0.1",

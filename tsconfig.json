@@ -6,7 +6,7 @@
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "types": ["@cloudflare/workers-types/2023-07-01"],
+    "types": ["@cloudflare/workers-types"],
     "moduleResolution": "bundler",
     "verbatimModuleSyntax": true,
     "strict": true,

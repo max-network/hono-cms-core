@@ -81,16 +81,20 @@
     "zod": "^4"
   },
   "peerDependenciesMeta": {
-    "@cloudflare/vitest-pool-workers": { "optional": true },
-    "vitest": { "optional": true }
+    "@cloudflare/vitest-pool-workers": {
+      "optional": true
+    },
+    "vitest": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.16.15",
-    "@cloudflare/workers-types": "^4.20260613.1",
-    "hono": "^4.12.25",
+    "@cloudflare/workers-types": "^5.20260829.1",
+    "hono": "^4.13.5",
     "rimraf": "^6.0.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.10",
+    "vitest": "^4.1.11",
     "zod": "^4.4.3"
   }
 }

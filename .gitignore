@@ -5,3 +5,7 @@ node_modules
 
 # NOTE: dist/ is intentionally NOT ignored. It is committed so that
 # `github:` installs resolve without running a build step. See README.
+
+# Local registry config. setup-node writes this in CI; keeping it untracked
+# means a pasted _authToken can never be committed by accident.
+.npmrc

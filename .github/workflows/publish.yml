@@ -1,29 +1,29 @@
-name: Publish
+name: Publish to GitHub Packages
 
-# Publishes @max-network/hono-cms-core to GitHub Packages on a published Release
-# (or manual dispatch). All dependencies are public npm, so install needs no
-# auth; the workflow GITHUB_TOKEN with packages:write authenticates the publish.
+# Publishes @max-network/hono-cms-core from the org's shared definition in
+# max-network/.github.
+#
+# The trigger changed. This used to publish ONLY from a published GitHub Release, which is
+# the bug worker-utils, billing, text-search and i18n each already fixed in their own copy
+# of this file. RELEASING IS NOW BUMPING THE VERSION IN YOUR PR; a merge whose version is
+# already on the registry publishes nothing and says so in the run summary.
 on:
+  push:
+    branches: [main]
+    tags:
+      - "v*"
   release:
     types: [published]
   workflow_dispatch:
 
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://npm.pkg.github.com
-          scope: "@max-network"
-      - run: npm install
-      - run: npm run typecheck
-      - run: npm run build
-      - run: npm publish
+    uses: max-network/.github/.github/workflows/publish-package.yml@main
+    with:
+      check-steps: "typecheck build"
+      tag-release: true
+    secrets: inherit

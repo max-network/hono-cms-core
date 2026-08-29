@@ -1,0 +1,16 @@
+name: Check
+
+# The quality gate, from the org's shared definition in max-network/.github.
+#
+# This repo previously had NO pull-request checks: publish.yml was the only workflow and it
+# ran only on a published Release, so a PR could merge entirely unverified.
+on:
+  pull_request:
+  workflow_call:
+
+jobs:
+  check:
+    uses: max-network/.github/.github/workflows/check.yml@main
+    with:
+      steps: "typecheck build"
+    secrets: inherit

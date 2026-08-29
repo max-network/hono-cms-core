@@ -1,16 +1,45 @@
 name: Check
 
-# The quality gate, from the org's shared definition in max-network/.github.
+# The quality gate for pull requests, and the gate publish.yml reuses so a release runs the
+# identical suite. This repo previously had NO pull-request checks at all: publish.yml was
+# the only workflow and it ran only on a published Release, so a PR could merge unverified.
 #
-# This repo previously had NO pull-request checks: publish.yml was the only workflow and it
-# ran only on a published Release, so a PR could merge entirely unverified.
+# NOT the org's shared workflow, unlike hono-ui and mcp-oauth. This repository is PUBLIC and
+# max-network/.github is private; a public repo cannot call a private repo's reusable
+# workflow, and doing so fails at startup with no job and no log. Making the shared repo
+# public would let this repo join the rest. Until that call is made, this file is a
+# deliberate local copy and will drift -- which is the whole problem the shared workflows
+# were extracted to solve, so it is worth revisiting rather than leaving as the status quo.
 on:
   pull_request:
   workflow_call:
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   check:
-    uses: max-network/.github/.github/workflows/check.yml@main
-    with:
-      steps: "typecheck build"
-    secrets: inherit
+    name: typecheck + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@max-network"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build

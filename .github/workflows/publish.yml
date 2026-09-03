@@ -54,14 +54,16 @@ jobs:
           cache: npm
 
       # Installs devDeps and runs `prepare` (the tsc build) so dist/ is fresh.
+      # See check.yml: installing @max-network/seo needs a token that can read another repo's
+      # private package. The Publish step below keeps GITHUB_TOKEN — it writes this repo's own.
       - run: npm ci
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Is this version already published?
         id: check
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           NAME=$(node -p "require('./package.json').name")
           VERSION=$(node -p "require('./package.json').version")

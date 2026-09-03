@@ -1,6 +1,6 @@
 {
   "name": "@max-network/hono-cms-core",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Shared engine for the Hono CMS template: auth, schemas, D1 query helpers, logger, public-site chrome (Layout/Header/Footer), admin UI components, and a Workers vitest config for Cloudflare Workers + Hono JSX sites.",
   "type": "module",
   "license": "MIT",
@@ -98,5 +98,8 @@
     "typescript": "^6.0.3",
     "vitest": "^4.1.11",
     "zod": "^4.4.3"
+  },
+  "dependencies": {
+    "@max-network/seo": "^0.9.0"
   }
 }

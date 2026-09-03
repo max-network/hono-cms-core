@@ -33,10 +33,13 @@ jobs:
           scope: "@max-network"
           cache: npm
 
+      # GH_PACKAGES_TOKEN, not GITHUB_TOKEN: the latter is scoped to THIS repo and cannot read
+      # another repo's private package, which is what @max-network/seo is. Same secret the other
+      # max-network repos install with. Falls back so the workflow still runs without it.
       - name: Install dependencies
         run: npm ci
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Typecheck
         run: npm run typecheck

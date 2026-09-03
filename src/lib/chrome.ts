@@ -79,4 +79,15 @@ export interface SiteChrome {
   manifestHref?: string
   /** Stylesheet href. Default `/styles/main.css`. */
   stylesheetHref?: string
+  /**
+   * The site's public, indexable paths — the ONE list behind both sitemap.xml and, eventually,
+   * anything else that needs to know what pages exist. Sites that omit it get a sitemap of `/`
+   * alone, which is what a static `public/sitemap.xml` was standing in for.
+   *
+   * Paths only, e.g. `["/", "/institut", "/kontakt"]`. Pages generated per database row are
+   * passed to {@link buildSitemap} at request time instead.
+   */
+  pages?: string[]
+  /** Paths kept out of search results, e.g. `["/admin", "/api/"]`. */
+  disallow?: string[]
 }

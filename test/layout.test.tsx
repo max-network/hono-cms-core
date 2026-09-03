@@ -8,6 +8,7 @@
 import { describe, it, expect } from "vitest"
 import { Layout } from "../src/components/Layout"
 import type { SiteChrome } from "../src/lib/chrome"
+import { buildSitemap, robotsResponse } from "../src/lib/seo"
 
 const chrome: SiteChrome = {
   name: "ivk",
@@ -68,5 +69,44 @@ describe("robots and canonical", () => {
 
   it("noindexes a gated page", () => {
     expect(render({ chrome, noindex: true })).toContain('content="noindex, nofollow"')
+  })
+})
+
+describe("sitemap and robots", () => {
+  const withPages: SiteChrome = {
+    ...chrome,
+    pages: ["/", "/institut", "/kontakt"],
+    disallow: ["/admin", "/api/"],
+  }
+
+  it("lists the chrome's pages and nothing else", () => {
+    const xml = buildSitemap(withPages)
+    for (const path of ["/", "/institut", "/kontakt"]) {
+      expect(xml).toContain(`<loc>https://example.test${path}</loc>`)
+    }
+    expect(xml.match(/<url>/g)).toHaveLength(3)
+  })
+
+  it("invents no lastmod, changefreq or priority", () => {
+    const xml = buildSitemap(withPages)
+    for (const tag of ["lastmod", "changefreq", "priority"]) expect(xml).not.toContain(tag)
+  })
+
+  it("dates a database-backed page by its own edit, and drops one it cannot parse", () => {
+    const xml = buildSitemap(withPages, [
+      { path: "/projekte/alpen", updatedAt: "2026-06-14 08:30:00" },
+      { path: "/projekte/chor", updatedAt: "" },
+    ])
+    expect(xml).toContain("<loc>https://example.test/projekte/alpen</loc>\n    <lastmod>2026-06-14</lastmod>")
+    expect(xml).toContain("<loc>https://example.test/projekte/chor</loc>")
+    expect(xml.match(/<lastmod>/g)).toHaveLength(1)
+  })
+
+  it("gives the named AI crawlers the same disallow list as the wildcard group", async () => {
+    const txt = await robotsResponse(withPages).text()
+    // robots.txt has no inheritance: a named group with no disallow is an open invitation.
+    expect(txt.match(/Disallow: \/admin/g)).toHaveLength(2)
+    expect(txt).toContain("User-agent: ClaudeBot")
+    expect(txt).toContain("Sitemap: https://example.test/sitemap.xml")
   })
 })

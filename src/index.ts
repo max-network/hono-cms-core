@@ -37,6 +37,11 @@ export { HtmlEditor } from "./components/HtmlEditor.js"
 // Shared public-site chrome — one Layout/Header/Footer for every CMS site,
 // driven by a normalized SiteChrome the consumer builds from its own config.
 export { Layout } from "./components/Layout.js"
+
+// sitemap.xml + robots.txt from the same SiteChrome the Layout renders its head from, so the
+// pages a crawler is told about and the pages that exist cannot drift apart.
+export { buildSitemap, sitemapResponse, robotsResponse } from "./lib/seo.js"
+export type { DynamicPage } from "./lib/seo.js"
 export { Header } from "./components/Header.js"
 export { Footer } from "./components/Footer.js"
 export type {

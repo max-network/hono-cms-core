@@ -98,8 +98,5 @@
     "typescript": "^6.0.3",
     "vitest": "^4.1.11",
     "zod": "^4.4.3"
-  },
-  "dependencies": {
-    "@max-network/seo": "^0.9.0"
   }
 }

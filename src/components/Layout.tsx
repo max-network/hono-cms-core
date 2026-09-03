@@ -1,6 +1,5 @@
 import type { FC, PropsWithChildren } from "hono/jsx"
 import { raw } from "hono/html"
-import { ldScript } from "@max-network/seo"
 import { Header } from "./Header.js"
 import { Footer } from "./Footer.js"
 import type { SiteChrome } from "../lib/chrome.js"
@@ -24,6 +23,20 @@ interface LayoutProps {
  * fields in `chrome.seo` / `chrome.favicons` extend the head; their defaults
  * reproduce the shared baseline used across the sites.
  */
+/**
+ * A schema.org object as a JSON-LD script tag, with `<` escaped to `<` so a value cannot
+ * close the element. These values are D1 rows editable from the admin UI — `site_full_name`
+ * reaches the Organization node directly — so an unescaped `</script>` in one of them injected
+ * whatever followed into every page of the site.
+ *
+ * Deliberately inlined rather than imported from `@max-network/seo`, which exports the identical
+ * helper. This is one line of escaping, and taking a private cross-repo dependency for it would
+ * make every consumer's CI need registry credentials to build shared chrome. If this package ever
+ * adopts that one for the whole head plus sitemap and robots, the dependency earns itself then.
+ */
+const ldScript = (data: unknown): string =>
+  `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`
+
 export const Layout: FC<PropsWithChildren<LayoutProps>> = ({
   chrome,
   children,
@@ -109,11 +122,7 @@ export const Layout: FC<PropsWithChildren<LayoutProps>> = ({
         <meta name="twitter:description" content={desc} />
         <meta name="twitter:image" content={ogImageUrl} />
 
-        {/*
-          JSON-LD via @max-network/seo's ldScript, which escapes `<` to `\u003c`. These values
-          come from D1 and are editable in the admin UI, so a site name containing `</script>`
-          used to close the script element and inject whatever followed into every page.
-        */}
+        {/* See {@link ldScript}: `<` must be escaped or a value closes the element. */}
         {raw(ldScript(organizationJsonLd))}
         {raw(ldScript(websiteJsonLd))}
         {jsonLd && raw(ldScript(jsonLd))}

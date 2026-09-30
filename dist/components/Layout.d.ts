@@ -9,6 +9,8 @@ interface LayoutProps {
     ogImage?: string;
     /** Page-specific JSON-LD, emitted after the Organization + WebSite nodes. */
     jsonLd?: Record<string, unknown>;
+    /** Gated or transient pages: emit `noindex` instead of the indexable directives. */
+    noindex?: boolean;
 }
 /**
  * Full HTML document + SEO head (title, canonical, Open Graph, Twitter,

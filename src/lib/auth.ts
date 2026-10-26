@@ -1,38 +1,20 @@
 import type { D1Database } from "@cloudflare/workers-types"
+import { randomHex, sha256Hex, timingSafeEqual } from "@max-network/worker-utils"
 
-// Generate a random session ID
 export function generateSessionId(): string {
-  const array = new Uint8Array(32)
-  crypto.getRandomValues(array)
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("")
+  return randomHex(32)
 }
 
-// Hash password using SHA-256 with salt
+// Stored as `saltHex:sha256Hex(saltHex + password)`.
 export async function hashPassword(password: string): Promise<string> {
-  const salt = crypto.getRandomValues(new Uint8Array(16))
-  const saltHex = Array.from(salt, (byte) => byte.toString(16).padStart(2, "0")).join("")
-
-  const encoder = new TextEncoder()
-  const data = encoder.encode(saltHex + password)
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray.map((byte) => byte.toString(16).padStart(2, "0")).join("")
-
-  return `${saltHex}:${hashHex}`
+  const saltHex = randomHex(16)
+  return `${saltHex}:${await sha256Hex(saltHex + password)}`
 }
 
-// Verify password against stored hash
 export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
   const [salt, hash] = storedHash.split(":")
   if (!salt || !hash) return false
-
-  const encoder = new TextEncoder()
-  const data = encoder.encode(salt + password)
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const computedHash = hashArray.map((byte) => byte.toString(16).padStart(2, "0")).join("")
-
-  return computedHash === hash
+  return timingSafeEqual(await sha256Hex(salt + password), hash)
 }
 
 // Session management

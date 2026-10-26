@@ -1,6 +1,6 @@
 {
   "name": "@max-network/hono-cms-core",
-  "version": "0.9.2",
+  "version": "0.10.0",
   "description": "Shared engine for the Hono CMS template: auth, schemas, D1 query helpers, logger, public-site chrome (Layout/Header/Footer), admin UI components, and a Workers vitest config for Cloudflare Workers + Hono JSX sites.",
   "type": "module",
   "license": "MIT",
@@ -92,15 +92,16 @@
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.22.0",
-    "@cloudflare/workers-types": "^5.20260829.1",
-    "hono": "^4.13.5",
+    "@cloudflare/workers-types": "^5.20261022.1",
+    "hono": "^4.13.13",
     "rimraf": "^6.0.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11",
     "zod": "^4.6.7"
   },
   "dependencies": {
-    "@max-network/seo": "^0.10.0"
+    "@max-network/seo": "^0.13.0",
+    "@max-network/worker-utils": "^0.17.0"
   },
   "overrides": {
     "zod": "$zod",

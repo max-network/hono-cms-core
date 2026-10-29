@@ -26,7 +26,7 @@ This is consumed as a **git dependency**. Pin a tag so the ref is stable:
 }
 ```
 
-`hono` (^4), `zod` (^4) and `@max-network/worker-utils` (`>=0.19.0 <1.0.0`) are **peer dependencies**: the consuming site provides them, so there is exactly one copy of each in the bundle.
+`hono` (^4), `zod` (^4) and `@max-network/worker-utils` (`>=0.19.0 <2.0.0`) are **peer dependencies**: the consuming site provides them, so there is exactly one copy of each in the bundle.
 
 ## Usage
 

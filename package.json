@@ -78,7 +78,7 @@
   },
   "peerDependencies": {
     "@cloudflare/vitest-pool-workers": ">=0.16.0",
-    "@max-network/worker-utils": ">=0.19.0 <1.0.0",
+    "@max-network/worker-utils": ">=0.19.0 <2.0.0",
     "hono": "^4",
     "vitest": "^4",
     "zod": "^4.6.6"

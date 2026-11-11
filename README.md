@@ -5,7 +5,7 @@ The shared **engine** of the Hono CMS template, extracted into a reusable packag
 It ships the parts that were measured to be near-identical across CMS sites (auth ~80%, schemas ~81%, `AdminLayout` ~94%, `HtmlEditor` ~83%, `logger` 100%):
 
 - **`logger`** — leveled console logger with request-error helper (no dependencies).
-- **`auth`** — SHA-256 password hashing, session create/validate/delete, and session-cookie helpers backed by Cloudflare D1.
+- **`auth`** — session create/validate/delete and session-cookie helpers backed by Cloudflare D1, plus `legacyPasswordMatches` for hashes stored before 0.11. Password hashing itself is `hashPassword` / `verifyPassword` from `@max-network/worker-utils`.
 - **`schemas`** — Zod 4 form-coercion + DB-row schemas and their inferred types.
 - **`db`** — D1 query helpers (`getArticles`, `getProjects`, `getTeamMembers`, `getPage`, `getSiteSettings`).
 - **`components/AdminLayout`** — the full admin shell (sidebar, theming, all admin CSS).
@@ -16,33 +16,42 @@ What stays **site-owned** (intentionally not packaged, 14–43% similarity): `co
 
 ## Install
 
-This is consumed as a **git dependency**. Pin a tag so the ref is stable:
+Published to GitHub Packages:
 
 ```jsonc
 {
   "dependencies": {
-    "hono-cms-core": "github:quotentiroler/hono-cms-core#v0.1.0"
+    "@max-network/hono-cms-core": "^0.11.0"
   }
 }
 ```
 
-`hono` (^4), `zod` (^4) and `@max-network/worker-utils` (`>=0.19.0 <2.0.0`) are **peer dependencies**: the consuming site provides them, so there is exactly one copy of each in the bundle.
+`hono` (^4), `zod` (^4) and `@max-network/worker-utils` (`>=1.7.0 <2.0.0`) are **peer dependencies**: the consuming site provides them, so there is exactly one copy of each in the bundle.
 
 ## Usage
 
 Import from the precise subpath entry points:
 
 ```ts
-import { logger } from "hono-cms-core/logger"
-import { hashPassword, validateSession, createSessionCookie } from "hono-cms-core/auth"
-import { contactFormSchema, type Article } from "hono-cms-core/schemas"
-import { getArticles, getSiteSettings } from "hono-cms-core/db"
-import { AdminLayout } from "hono-cms-core/components/AdminLayout"
-import { ImageUpload } from "hono-cms-core/components/ImageUpload"
-import { HtmlEditor } from "hono-cms-core/components/HtmlEditor"
+import { logger } from "@max-network/hono-cms-core/logger"
+import { legacyPasswordMatches, validateSession, createSessionCookie } from "@max-network/hono-cms-core/auth"
+import { contactFormSchema, type Article } from "@max-network/hono-cms-core/schemas"
+import { getArticles, getSiteSettings } from "@max-network/hono-cms-core/db"
+import { AdminLayout } from "@max-network/hono-cms-core/components/AdminLayout"
+import { ImageUpload } from "@max-network/hono-cms-core/components/ImageUpload"
+import { HtmlEditor } from "@max-network/hono-cms-core/components/HtmlEditor"
 ```
 
-A root barrel (`hono-cms-core`) re-exports everything for convenience, but prefer the subpaths so consumers only pull what they use.
+Login verifies with worker-utils and upgrades a pre-0.11 hash on the next successful sign-in:
+
+```ts
+import { hashPassword, verifyPassword } from "@max-network/worker-utils"
+
+const check = await verifyPassword(password, user.password_hash, legacyPasswordMatches)
+if (check.ok && check.needsRehash) await savePasswordHash(user.id, await hashPassword(password))
+```
+
+A root barrel (`@max-network/hono-cms-core`) re-exports everything for convenience, but prefer the subpaths so consumers only pull what they use.
 
 ### JSX configuration
 
@@ -59,20 +68,14 @@ The components are Hono JSX. The consuming `tsconfig.json` must set:
 
 ## Build & distribution
 
-`dist/` (compiled JS + `.d.ts`) is **committed to the repository**, and that is the primary distribution mechanism.
-
-Why committed `dist/` rather than a `prepare`-on-install build:
-
-- A `github:` install only runs the `prepare` lifecycle script when dev dependencies install and the environment is not `--omit=dev`/production. In CI and many bundler toolchains that is unreliable, so resolution of `hono-cms-core/auth` etc. could fail.
-- Committing `dist/` makes the package resolve deterministically the moment the git ref is checked out — no build step, no dev deps required at the consumer.
-
-A `prepare` script (`npm run build`) is still defined so that a fresh clone / `npm install` inside this repo rebuilds `dist/`. The workflow when changing engine code is: edit `src/`, run `npm run build`, commit `src/` **and** the regenerated `dist/`, then tag a new release.
+`dist/` is built, never committed: `publish.yml` runs `typecheck test build` and publishes to GitHub Packages on every push to `main` whose `package.json` version is new.
 
 ```bash
-npm install   # installs dev deps + runs prepare (build)
-npm run build # tsc -p tsconfig.build.json -> dist/
+npm ci
+npm run check   # typecheck + tests
+npm run build   # tsc -p tsconfig.build.json -> dist/
 ```
 
 ## Versioning
 
-Tag every release (e.g. `v0.1.0`) so consumers can pin a ref. Engine changes are breaking by default for sites that depend on exact behavior, so bump deliberately.
+Bump `package.json` in the PR that changes engine code; merging to `main` publishes and tags it. 0.x minors may break consumers, so bump deliberately.

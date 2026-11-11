@@ -1,8 +1,4 @@
-// Shared "site chrome" contract: the data a Hono CMS site's Layout / Header /
-// Footer need, normalized so ONE set of components renders every site. Each
-// consumer builds a `SiteChrome` from its own source (a static `siteConfig`
-// object, or a per-request DB `SiteSettings` row) and passes it in — the
-// components below import no site config of their own.
+// The data a CMS site's shared Layout / Header / Footer render from; each site builds one.
 
 /** A navigation / footer link. */
 export interface NavItem {
@@ -79,14 +75,7 @@ export interface SiteChrome {
   manifestHref?: string
   /** Stylesheet href. Default `/styles/main.css`. */
   stylesheetHref?: string
-  /**
-   * The site's public, indexable paths — the ONE list behind both sitemap.xml and, eventually,
-   * anything else that needs to know what pages exist. Sites that omit it get a sitemap of `/`
-   * alone, which is what a static `public/sitemap.xml` was standing in for.
-   *
-   * Paths only, e.g. `["/", "/institut", "/kontakt"]`. Pages generated per database row are
-   * passed to {@link buildSitemap} at request time instead.
-   */
+  /** Public, indexable paths behind sitemap.xml, e.g. `["/", "/kontakt"]`. Default `["/"]`. */
   pages?: string[]
   /** Paths kept out of search results, e.g. `["/admin", "/api/"]`. */
   disallow?: string[]

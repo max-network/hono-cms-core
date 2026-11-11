@@ -2,6 +2,4 @@ node_modules
 *.log
 .DS_Store
 *.tsbuildinfo
-
-# NOTE: dist/ is intentionally NOT ignored. It is committed so that
-# `github:` installs resolve without running a build step. See README.
+dist

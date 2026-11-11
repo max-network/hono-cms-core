@@ -6,8 +6,7 @@ export { logger } from "./lib/logger.js"
 
 export {
   generateSessionId,
-  hashPassword,
-  verifyPassword,
+  legacyPasswordMatches,
   createSession,
   validateSession,
   deleteSession,

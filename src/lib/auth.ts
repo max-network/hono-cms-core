@@ -1,23 +1,17 @@
 import type { D1Database } from "@cloudflare/workers-types"
-import { randomHex, sha256Hex, timingSafeEqual } from "@max-network/worker-utils"
+import { randomHex, sha256Hex, timingSafeEqual, type LegacyPasswordCheck } from "@max-network/worker-utils"
 
 export function generateSessionId(): string {
   return randomHex(32)
 }
 
-// Stored as `saltHex:sha256Hex(saltHex + password)`.
-export async function hashPassword(password: string): Promise<string> {
-  const saltHex = randomHex(16)
-  return `${saltHex}:${await sha256Hex(saltHex + password)}`
-}
-
-export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
-  const [salt, hash] = storedHash.split(":")
+/** Verifies the pre-0.11 `saltHex:sha256Hex(saltHex + password)` format, for worker-utils' `verifyPassword`. */
+export const legacyPasswordMatches: LegacyPasswordCheck = async (password, stored) => {
+  const [salt, hash] = stored.split(":")
   if (!salt || !hash) return false
   return timingSafeEqual(await sha256Hex(salt + password), hash)
 }
 
-// Session management
 export async function createSession(db: D1Database, userId: number): Promise<string> {
   const sessionId = generateSessionId()
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
@@ -52,12 +46,10 @@ export async function deleteSession(db: D1Database, sessionId: string): Promise<
   await db.prepare("DELETE FROM sessions WHERE id = ?").bind(sessionId).run()
 }
 
-// Clean up expired sessions
 export async function cleanupExpiredSessions(db: D1Database): Promise<void> {
   await db.prepare("DELETE FROM sessions WHERE expires_at < datetime('now')").run()
 }
 
-// Get session ID from cookie header
 export function getSessionIdFromCookie(cookieHeader: string | undefined | null): string | null {
   if (!cookieHeader) return null
 
@@ -69,12 +61,10 @@ export function getSessionIdFromCookie(cookieHeader: string | undefined | null):
   return null
 }
 
-// Create session cookie
 export function createSessionCookie(sessionId: string): string {
   return `session=${sessionId}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}`
 }
 
-// Delete session cookie
 export function deleteSessionCookie(): string {
   return "session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0"
 }

@@ -1,17 +1,4 @@
-/**
- * sitemap.xml and robots.txt for a CMS site, built from the same {@link SiteChrome} the shared
- * Layout renders its head from — so the pages a crawler is told about and the pages that exist
- * cannot drift apart.
- *
- * The rules come from `@max-network/seo`, the org's SEO package, rather than a second
- * implementation living here. Every site using this package shipped a hand-maintained
- * `public/sitemap.xml` instead, and every one of them had gone stale: ivkultur's said every page
- * was last modified on 2026-02-28, months after the pages changed, and all of them carried the
- * `changefreq` and `priority` Google has ignored since 2023.
- *
- * These sites are single-language, so every page is `localized: false`: each canonicalizes to its
- * own clean URL and none claims an hreflang alternate it does not have.
- */
+/** sitemap.xml and robots.txt built by `@max-network/seo` from the same {@link SiteChrome} the Layout renders. */
 import { createSeo, sitemapDate, type Seo } from "@max-network/seo"
 import type { SiteChrome } from "./chrome.js"
 
@@ -41,12 +28,7 @@ function seoFor(chrome: SiteChrome): Seo<string> {
   })
 }
 
-/**
- * The `sitemap.xml` body. `dynamic` carries pages the chrome cannot list because they come from
- * the database; each keeps its own edit date, and one that will not parse is simply omitted. No
- * entry is ever stamped with "today": a sitemap claiming the whole site changed on every deploy
- * is one Google stops believing.
- */
+/** The `sitemap.xml` body; a `dynamic` page whose date will not parse is listed without `<lastmod>`. */
 export function buildSitemap(chrome: SiteChrome, dynamic: readonly DynamicPage[] = []): string {
   const lastmod: Record<string, string | undefined> = {}
   for (const page of dynamic) lastmod[page.path] = sitemapDate(page.updatedAt)
@@ -66,14 +48,7 @@ export function sitemapResponse(chrome: SiteChrome, dynamic: readonly DynamicPag
   })
 }
 
-/**
- * `robots.txt` as a `Response`: the public surface open to search engines and AI answer engines
- * alike, `chrome.disallow` closed to both, and a Sitemap line pointing at the canonical origin.
- *
- * The AI crawlers are named as their own group rather than left to the wildcard, because
- * robots.txt has no inheritance: a named `User-agent` group REPLACES the `*` group rather than
- * extending it, so a named crawler with no disallow rules is one you have invited everywhere.
- */
+/** `robots.txt`: open to search and AI crawlers alike, `chrome.disallow` closed to both. */
 export function robotsResponse(chrome: SiteChrome): Response {
   return seoFor(chrome).robotsResponse({ disallow: chrome.disallow ?? [] })
 }

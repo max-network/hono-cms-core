@@ -94,7 +94,7 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.22.0",
     "@cloudflare/workers-types": "^5.20261025.1",
-    "@max-network/worker-utils": "^1.14.1",
+    "@max-network/worker-utils": "^1.18.0",
     "hono": "^4.13.13",
     "rimraf": "^6.0.1",
     "typescript": "^6.0.3",

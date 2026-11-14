@@ -2,7 +2,7 @@
 // vitest.config.ts was the same ~19 lines (Workers pool + D1 migrations); this
 // collapses each to `export default await defineWorkerVitestConfig()`.
 import { defineConfig } from "vitest/config"
-import { cloudflareTest, cloudflarePool, readD1Migrations } from "@cloudflare/vitest-pool-workers"
+import { cloudflareTest, cloudflarePool, readD1Migrations } from "@cloudflare/vitest-plugin"
 
 export interface WorkerVitestOptions {
   /** Path to the wrangler config the pool + test plugin read. Default `./wrangler.jsonc`. */
